@@ -1,0 +1,44 @@
+name: "model"
+backend: "onnxruntime"
+max_batch_size: ${triton_max_batch_size}
+
+model_transaction_policy {
+  decoupled: false
+}
+
+dynamic_batching {
+    preferred_batch_size: [ ${triton_max_batch_size} ]
+    max_queue_delay_microseconds: ${max_queue_delay_microseconds}
+    default_queue_policy: { max_queue_size: ${max_queue_size} }
+}
+
+input [
+  {
+    name: "input_ids"
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  },
+  {
+    name: "attention_mask"
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  },
+  {
+    name: "token_type_ids"
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  }
+]
+output [
+  {
+    name: "last_hidden_state"
+    data_type: TYPE_FP32
+    dims: [ -1, ${word_embedding_dimension} ]
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind : KIND_GPU
+  }
+]
