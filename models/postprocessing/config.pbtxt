@@ -1,0 +1,58 @@
+name: "postprocessing"
+backend: "python"
+max_batch_size: ${triton_max_batch_size}
+dynamic_batching {}
+input [
+  {
+    name: "INPUT_EMBEDDINGS"
+    data_type: TYPE_FP32
+    dims: [ -1, -1 ]
+  },
+  {
+    name: "ATTENTION_MASKS"
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  },
+  {
+    name: "CUSTOM_POOLING_MODE"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
+  }
+]
+output [
+  {
+    name: "OUTPUT"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  }
+]
+
+instance_group [
+    {
+        count: ${postprocessing_instance_count}
+        kind: KIND_CPU
+    }
+]
+
+parameters {
+  key: "default_pooling_mode"
+  value: {
+    string_value: "${default_pooling_mode}"
+  }
+}
+
+parameters {
+  key: "model_name"
+  value: {
+    string_value: "${model_name}"
+  }
+}
+
+parameters {
+  key: "normalize_final_emb"
+  value: {
+    string_value: "${normalize_final_emb}"
+  }
+}
