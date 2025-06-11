@@ -19,6 +19,13 @@ input [
     dims: [ 1 ]
     reshape: { shape: [ ] }
     optional: true
+  },
+  {
+    name: "NORMALIZE_FINAL_EMB"
+    data_type: TYPE_BOOL
+    dims: [ 1 ]
+    reshape: { shape: [ ] }
+    optional: true
   }
 ]
 output [
@@ -47,12 +54,5 @@ parameters {
   key: "model_name"
   value: {
     string_value: "${model_name}"
-  }
-}
-
-parameters {
-  key: "normalize_final_emb"
-  value: {
-    string_value: "${normalize_final_emb}"
   }
 }
