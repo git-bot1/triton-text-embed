@@ -4,7 +4,6 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 import triton_python_backend_utils as pb_utils
-from transformers import AutoTokenizer
 
 
 class TritonPythonModel:
@@ -36,8 +35,6 @@ class TritonPythonModel:
         self.default_pooling_mode = default_pooling_mode
 
         self.model_name = model_config['parameters']['model_name']['string_value']
-        # self.normalize_final_emb is true is all cases except when explicitly passed false
-        self.normalize_final_emb = not (model_config['parameters']['normalize_final_emb']['string_value'] == "false")
 
         input_names = ["INPUT_EMBEDDINGS", "ATTENTION_MASKS"]
         for input_name in input_names:
@@ -80,10 +77,16 @@ class TritonPythonModel:
         responses = []
         for idx, request in enumerate(requests):
           embeddings = pb_utils.get_input_tensor_by_name(request,'INPUT_EMBEDDINGS').as_numpy()
+
           requested_pooling_mode = pb_utils.get_input_tensor_by_name(request, 'CUSTOM_POOLING_MODE')
-          
           if requested_pooling_mode is not None:
             requested_pooling_mode = requested_pooling_mode.as_numpy()[0].decode()
+          
+          normalize_final_emb = pb_utils.get_input_tensor_by_name(request, 'NORMALIZE_FINAL_EMB')
+          if normalize_final_emb is not None:
+            normalize_final_emb = normalize_final_emb.as_numpy()[0]
+          else:
+            normalize_final_emb = True
 
           used_pooling_mode = requested_pooling_mode or self.default_pooling_mode
 
@@ -124,7 +127,7 @@ class TritonPythonModel:
           else:
             raise RuntimeError(f"'{used_pooling_mode}' is not a valid pooling mode.")
 
-          if self.normalize_final_emb:
+          if normalize_final_emb:
             final_emb = F.normalize(final_emb, p=2, dim=1)
           
           output_tensor = pb_utils.Tensor(
