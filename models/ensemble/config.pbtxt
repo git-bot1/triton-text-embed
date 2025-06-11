@@ -12,6 +12,12 @@ input [
     data_type: TYPE_STRING
     dims: [ 1 ]
     optional: true
+  },
+  {
+    name: "normalize_final_emb"
+    data_type: TYPE_BOOL
+    dims: [ 1 ]
+    optional: true
   }
 ]
 output [
@@ -77,6 +83,10 @@ ensemble_scheduling {
       input_map {
         key: "CUSTOM_POOLING_MODE"
         value: "pooling_mode"
+      }
+      input_map {
+        key: "NORMALIZE_FINAL_EMB"
+        value: "normalize_final_emb"
       }
       output_map {
         key: "OUTPUT"
