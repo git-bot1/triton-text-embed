@@ -1,13 +1,8 @@
-import base64
-import io
 import json
-import os
-from typing import List
 
 import numpy as np
-import requests
 import triton_python_backend_utils as pb_utils
-from transformers import AutoProcessor, AutoTokenizer, T5Tokenizer
+from transformers import AutoTokenizer
 
 
 class TritonPythonModel:
